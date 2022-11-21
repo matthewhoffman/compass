@@ -37,6 +37,12 @@ class SetUpExperiment(Step):
         else:
             exp_fcg = self.exp
 
+        # We chose to use vM calving at 4km but restore calving at 8km
+        if mesh_res == '04':
+            use_vM_calving = True
+        else:
+            use_vM_calving = False
+
         config = self.config
         section = config['ismip6_run_ais']
         mesh_res = section.get('mesh_res')
@@ -129,6 +135,14 @@ class SetUpExperiment(Step):
                 out_name='streams.landice',
                 template_replacements=mask_stream_replacements)
 
+        if use_vM_calving:
+            vM_param_path = section.get('von_mises_parameter_path')
+            vM_stream_replacements = {'input_file_VM_params': vM_param_path}
+            self.add_streams_file(
+                'compass.landice.tests.ismip6_run_ais', 'streams.vM_params',
+                out_name='streams.landice',
+                template_replacements=vM_stream_replacements)
+
         # Set up namelist and customize as needed
         self.add_namelist_file(
             'compass.landice.tests.ismip6_run_ais', 'namelist.landice',
@@ -144,6 +158,14 @@ class SetUpExperiment(Step):
             options = {'config_do_restart': ".false.",
                        'config_start_time': "'2000-01-01_00:00:00'",
                        'config_stop_time': "'2015-01-01_00:00:00'"}
+            self.add_namelist_options(options=options,
+                                      out_name='namelist.landice')
+
+        if use_vM_calving:
+            options = {'config_calving': "'von_Mises_stress'",
+                       'config_restore_calving_front': ".false.",
+                       'config_floating_von_Mises_threshold_stress_source': "'data'",
+                       'config_grounded_von_Mises_threshold_stress_source': "'data'"}
             self.add_namelist_options(options=options,
                                       out_name='namelist.landice')
 
