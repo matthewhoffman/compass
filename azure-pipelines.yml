@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-    - master
+    - main
     - legacy
   tags:
     include:
@@ -9,7 +9,7 @@ trigger:
 pr:
   branches:
     include:
-    - master
+    - main
     - legacy
 
 jobs:
@@ -38,8 +38,11 @@ jobs:
       eval "$(conda shell.bash hook)"
       conda config --add channels conda-forge
       conda config --set channel_priority strict
-      conda install --yes python=$PYTHON_VERSION conda conda-build mamba boa
-      conda update --all --yes
+      conda update --yes --all
+      conda install --yes mamba
+      # workaround based on recent failures
+      rm /usr/share/miniconda/pkgs/cache/*.json
+      mamba install --yes conda-build boa
     displayName: Update conda base environment
 
   - bash: |
@@ -102,7 +105,7 @@ jobs:
 
       if [ -n "${branch}" ]; then
         echo "This build is for branch $branch"
-        if [[ ${branch} == "master" ]]; then
+        if [[ ${branch} == "main" ]]; then
           export DOCS_VERSION="latest"
           run=True
         elif [[ ${branch} == "legacy" ]]; then
@@ -188,8 +191,9 @@ jobs:
       eval "$(conda shell.bash hook)"
       conda config --add channels conda-forge
       conda config --set channel_priority strict
-      conda install --yes python=$PYTHON_VERSION conda conda-build mamba boa
-      conda update --all --yes
+      conda update --yes --all
+      conda install --yes mamba
+      mamba install --yes conda-build boa
     displayName: Update conda base environment
 
   - bash: |

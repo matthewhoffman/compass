@@ -434,14 +434,18 @@ isomip_plus
    forward.Forward.setup
    forward.Forward.run
 
-   geom.process_input_geometry
+   geom.define_thin_film_mask_step1
    geom.interpolate_ocean_mask
+   geom.interpolate_geom
 
    initial_state.InitialState
    initial_state.InitialState.run
 
    misomip.Misomip
    misomip.Misomip.run
+
+   process_geom.ProcessGeom
+   process_geom.ProcessGeom.run
 
    ssh_adjustment.SshAdjustment
    ssh_adjustment.SshAdjustment.setup
@@ -474,6 +478,63 @@ merry_go_round
 
    viz.Viz
    viz.Viz.run
+
+nonhydro
+~~~~~~~~
+
+.. currentmodule:: compass.ocean.tests.nonhydro
+
+.. autosummary::
+   :toctree: generated/
+
+   Nonhydro
+
+   stratified_seiche.StratifiedSeiche
+   stratified_seiche.StratifiedSeiche.configure
+   stratified_seiche.initial_state.InitialState
+   stratified_seiche.initial_state.InitialState.setup
+   stratified_seiche.initial_state.InitialState.run
+   stratified_seiche.forward.Forward
+   stratified_seiche.forward.Forward.setup
+   stratified_seiche.forward.Forward.run
+   stratified_seiche.visualize.Visualize
+   stratified_seiche.visualize.Visualize.setup
+   stratified_seiche.visualize.Visualize.run
+
+   solitary_wave.SolitaryWave
+   solitary_wave.SolitaryWave.configure
+   solitary_wave.initial_state.InitialState
+   solitary_wave.initial_state.InitialState.setup
+   solitary_wave.initial_state.InitialState.run
+   solitary_wave.forward.Forward
+   solitary_wave.forward.Forward.setup
+   solitary_wave.forward.Forward.run
+   solitary_wave.visualize.Visualize
+   solitary_wave.visualize.Visualize.setup
+   solitary_wave.visualize.Visualize.run
+
+overflow
+~~~~~~~~
+
+.. currentmodule:: compass.ocean.tests.overflow
+
+.. autosummary::
+   :toctree: generated/
+
+   Overflow
+
+   default.Default
+
+   rpe_test.RpeTest
+
+   rpe_test.analysis.Analysis
+   rpe_test.analysis.Analysis.run
+
+   forward.Forward
+   forward.Forward.run
+
+   initial_state.InitialState
+   initial_state.InitialState.run
 
 
 planar_convergence
@@ -676,6 +737,57 @@ sphere_transport framework
    process_output.plot_convergence
    process_output.plot_filament
    process_output.plot_over_and_undershoot_errors
+
+tides
+~~~~~
+
+test cases and steps
+''''''''''''''''''''
+
+.. currentmodule:: compass.ocean.tests.tides
+
+.. autosummary::
+   :toctree: generated/
+
+   Tides
+   configure
+
+   mesh.Mesh
+   mesh.Mesh.configure
+   mesh.Mesh.run
+
+   init.Init
+   init.Init.configure
+   init.Init.run
+   init.remap_bathymetry.RemapBathymetry
+   init.remap_bathymetry.RemapBathymetry.run
+   init.initial_state.InitialState
+   init.initial_state.InitialState.setup
+   init.initial_state.InitialState.run
+   init.interpolate_wave_drag.InterpolateWaveDrag
+   init.interpolate_wave_drag.InterpolateWaveDrag.interpolate_data_to_grid
+   init.interpolate_wave_drag.InterpolateWaveDrag.plot_interp_data
+   init.interpolate_wave_drag.InterpolateWaveDrag.write_to_file
+   init.interpolate_wave_drag.InterpolateWaveDrag.run
+
+
+   forward.Forward
+   forward.Forward.configure
+   forward.Forward.run
+   forward.forward.ForwardStep
+   forward.forward.ForwardStep.setup
+   forward.forward.ForwardStep.run
+
+   analysis.Analysis
+   analysis.Analysis.setup
+   analysis.Analysis.write_coordinate_file
+   analysis.Analysis.setup_otps2
+   analysis.Analysis.run_otps2
+   analysis.Analysis.read_otps2_output
+   analysis.Analysis.append_tpxo_data
+   analysis.Analysis.check_tpxo_data
+   analysis.Analysis.plot
+   analysis.Analysis.run
 
 ziso
 ~~~~

@@ -11,7 +11,7 @@ import grp
 import shutil
 import progressbar
 from jinja2 import Template
-from importlib.resources import path
+import importlib.resources
 from configparser import ConfigParser
 
 from mache import discover_machine, MachineInfo
@@ -30,8 +30,9 @@ def get_config(config_file, machine):
 
     if machine is not None:
         if not machine.startswith('conda'):
-            with path('mache.machines', f'{machine}.cfg') as machine_config:
-                config.read(str(machine_config))
+            machine_config = \
+                importlib.resources.files('mache.machines') / f'{machine}.cfg'
+            config.read(str(machine_config))
 
         machine_config = os.path.join(here, '..', 'compass', 'machines',
                                       '{}.cfg'.format(machine))
@@ -198,7 +199,10 @@ def get_env_setup(args, config, machine, compiler, mpi, env_type, source_path,
         activ_path = os.path.abspath(os.path.join(conda_base, '..'))
 
     if args.with_albany:
-        check_albany_supported(machine, compiler, mpi, source_path)
+        check_supported('albany', machine, compiler, mpi, source_path)
+
+    if args.with_petsc:
+        check_supported('petsc', machine, compiler, mpi, source_path)
 
     if env_type == 'dev':
         spack_env = f'dev_compass_{compass_version}{env_suffix}'
@@ -263,7 +267,16 @@ def build_conda_env(env_type, recreate, machine, mpi, conda_mpi, version,
         template = Template(f.read())
 
     if env_type == 'dev':
-        spec_file = template.render(mpi=conda_mpi, mpi_prefix=mpi_prefix)
+        supports_otps = platform.system() == 'Linux'
+        if platform.system() == 'Linux':
+            conda_openmp = 'libgomp'
+        elif platform.system() == 'Darwin':
+            conda_openmp = 'llvm-openmp'
+        else:
+            conda_openmp = ''
+        spec_file = template.render(supports_otps=supports_otps,
+                                    mpi=conda_mpi, openmp=conda_openmp,
+                                    mpi_prefix=mpi_prefix)
 
         spec_filename = f'spec-file-{conda_mpi}.txt'
         with open(spec_filename, 'w') as handle:
@@ -355,7 +368,7 @@ def get_env_vars(machine, compiler, mpilib):
 
 
 def build_spack_env(config, update_spack, machine, compiler, mpi, spack_env,
-                    spack_base, spack_template_path, env_vars, tmpdir):
+                    spack_base, spack_template_path, env_vars, tmpdir, logger):
 
     albany = config.get('deploy', 'albany')
     esmf = config.get('deploy', 'esmf')
@@ -393,7 +406,7 @@ def build_spack_env(config, update_spack, machine, compiler, mpi, spack_env,
         specs.append(f'scorpio@{scorpio}+pnetcdf~timing+internal-timing~tools+malloc')
 
     if albany != 'None':
-        specs.append(f'albany@{albany}+mpas')
+        specs.append(f'albany@{albany}+mpas+cxx17')
 
     yaml_template = f'{spack_template_path}/{machine}_{compiler}_{mpi}.yaml'
     if not os.path.exists(yaml_template):
@@ -413,6 +426,7 @@ def build_spack_env(config, update_spack, machine, compiler, mpi, spack_env,
             files = glob.glob(os.path.join(include_path, f'{prefix}*'))
             for filename in files:
                 os.remove(filename)
+        set_ld_library_path(spack_branch_base, spack_env, logger)
 
     spack_script = get_spack_script(
         spack_path=spack_branch_base, env_name=spack_env, compiler=compiler,
@@ -459,6 +473,15 @@ def build_spack_env(config, update_spack, machine, compiler, mpi, spack_env,
                    f'export USE_PETSC=true\n'
 
     return spack_branch_base, spack_script, env_vars
+
+
+def set_ld_library_path(spack_branch_base, spack_env, logger):
+    commands = \
+        f'source {spack_branch_base}/share/spack/setup-env.sh; ' \
+        f'spack env activate {spack_env}; ' \
+        f'spack config add modules:prefix_inspections:lib:[LD_LIBRARY_PATH]; ' \
+        f'spack config add modules:prefix_inspections:lib64:[LD_LIBRARY_PATH]'
+    check_call(commands, logger=logger)
 
 
 def write_load_compass(template_path, activ_path, conda_base, env_type,
@@ -729,8 +752,8 @@ def parse_unsupported(machine, source_path):
     return unsupported
 
 
-def check_albany_supported(machine, compiler, mpi, source_path):
-    filename = os.path.join(source_path, 'conda', 'albany_supported.txt')
+def check_supported(library, machine, compiler, mpi, source_path):
+    filename = os.path.join(source_path, 'conda', f'{library}_supported.txt')
     with open(filename, 'r') as f:
         content = f.readlines()
     content = [line.strip() for line in content if not
@@ -740,13 +763,13 @@ def check_albany_supported(machine, compiler, mpi, source_path):
             continue
         supported = [part.strip() for part in line.split(',')]
         if len(supported) != 3:
-            raise ValueError(f'Bad line in "albany_supported.txt" {line}')
+            raise ValueError(f'Bad line in "{library}_supported.txt" {line}')
         if machine == supported[0] and compiler == supported[1] and \
                 mpi == supported[2]:
             return
 
-    raise ValueError(f'{compiler} with {mpi} is not supported with Albany on '
-                     f'{machine}')
+    raise ValueError(f'{compiler} with {mpi} is not supported with {library} '
+                     f'on {machine}')
 
 
 def main():
@@ -864,14 +887,16 @@ def main():
                 spack_branch_base, spack_script, env_vars = build_spack_env(
                     config, args.update_spack, machine, compiler, mpi,
                     spack_env, spack_base, spack_template_path, env_vars,
-                    args.tmpdir)
+                    args.tmpdir, logger)
                 spack_script = f'echo Loading Spack environment...\n' \
                                f'{spack_script}\n' \
                                f'echo Done.\n' \
                                f'echo\n'
             else:
-                env_vars = f'{env_vars}' \
-                           f'export PIO={conda_env_path}\n'
+                env_vars = \
+                    f'{env_vars}' \
+                    f'export PIO={conda_env_path}\n' \
+                    f'export OPENMP_INCLUDE=-I"{conda_env_path}/include"\n'
         else:
             env_vars = ''
 

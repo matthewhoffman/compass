@@ -16,13 +16,8 @@ test suite:
     # cases.
     [paths]
 
-    # The root to a location where the mesh_database, initial_condition_database,
-    # and bathymetry_database for MPAS-Ocean will be cached
-    ocean_database_root = /lcrc/group/e3sm/public_html/mpas_standalonedata/mpas-ocean
-
-    # The root to a location where the mesh_database and initial_condition_database
-    # for MALI will be cached
-    landice_database_root = /lcrc/group/e3sm/public_html/mpas_standalonedata/mpas-albany-landice
+    # A shared root directory where MPAS standalone data can be found
+    database_root = /lcrc/group/e3sm/public_html/mpas_standalonedata
 
     # the path to the base conda environment where compass environments have
     # been created
@@ -37,7 +32,7 @@ test suite:
     compiler = intel
 
     # the system MPI library to use for intel compiler
-    mpi_intel = impi
+    mpi_intel = openmpi
 
     # the system MPI library to use for gnu compiler
     mpi_gnu = openmpi
@@ -79,13 +74,13 @@ variables:
 
 .. code-block:: bash
 
-    source /lcrc/soft/climate/compass/chrysalis/load_latest_compass_intel_impi.sh
+    source /lcrc/soft/climate/compass/chrysalis/load_latest_compass_intel_openmpi.sh
 
 To build the MPAS model with
 
 .. code-block:: bash
 
-    make [DEBUG=true] [OPENMP=true] intel-mpi
+    make [DEBUG=true] [OPENMP=true] ifort
 
 
 Gnu on Chrysalis

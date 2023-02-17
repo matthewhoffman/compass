@@ -20,13 +20,8 @@ or when you choose ``-m anvil`` when setting up test cases or a test suite:
     # cases.
     [paths]
 
-    # The root to a location where the mesh_database, initial_condition_database,
-    # and bathymetry_database for MPAS-Ocean will be cached
-    ocean_database_root = /lcrc/group/e3sm/public_html/mpas_standalonedata/mpas-ocean
-
-    # The root to a location where the mesh_database and initial_condition_database
-    # for MALI will be cached
-    landice_database_root = /lcrc/group/e3sm/public_html/mpas_standalonedata/mpas-albany-landice
+    # A shared root directory where MPAS standalone data can be found
+    database_root = /lcrc/group/e3sm/public_html/mpas_standalonedata
 
     # the path to the base conda environment where compass environments have
     # been created
@@ -44,7 +39,7 @@ or when you choose ``-m anvil`` when setting up test cases or a test suite:
     mpi_intel = impi
 
     # the system MPI library to use for gnu compiler
-    mpi_gnu = mvapich
+    mpi_gnu = openmpi
 
     # the base path for spack environments used by compass
     spack = /lcrc/soft/climate/compass/anvil/spack
@@ -110,7 +105,7 @@ variables:
 
 .. code-block:: bash
 
-    source /lcrc/soft/climate/compass/anvil/load_latest_compass_gnu_mvapich.sh
+    source /lcrc/soft/climate/compass/anvil/load_latest_compass_gnu_openmpi.sh
 
 To build the MPAS model with
 

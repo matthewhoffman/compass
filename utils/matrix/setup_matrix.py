@@ -28,6 +28,8 @@ all_build_targets = {
         ('intel', 'mvapich'): 'ifort',
         ('gnu', 'openmpi'): 'gfortran',
         ('gnu', 'mvapich'): 'gfortran'},
+    'chicoma-cpu': {
+        ('gnu', 'mpich'): 'gnu-cray'},
     'chrysalis': {
         ('intel', 'impi'): 'intel-mpi',
         ('intel', 'openmpi'): 'ifort',
@@ -36,10 +38,10 @@ all_build_targets = {
         ('intel', 'impi'): 'intel-mpi',
         ('gnu', 'openmpi'): 'gfortran'},
     'cori-haswell': {
-        ('intel', 'mpt'): 'intel-nersc',
-        ('gnu', 'mpt'): 'gnu-nersc'},
+        ('intel', 'mpt'): 'intel-cray',
+        ('gnu', 'mpt'): 'gnu-cray'},
     'pm-cpu': {
-        ('gnu', 'mpich'): 'gnu-nersc'},
+        ('gnu', 'mpich'): 'gnu-cray'},
     'conda-linux': {
         ('gfortran', 'mpich'): 'gfortran',
         ('gfortran', 'openmpi'): 'gfortran'},

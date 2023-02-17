@@ -47,13 +47,15 @@ the MPAS model.
 |              |            +-----------+-------------------+
 |              |            | openmpi   | ifort             |
 |              +------------+-----------+-------------------+
-|              | gnu        | mvapich   | gfortran          |
+|              | gnu        | openmpi   | gfortran          |
 |              |            +-----------+-------------------+
-|              |            | openmpi   | gfortran          |
+|              |            | mvapich   | gfortran          |
 +--------------+------------+-----------+-------------------+
-| chrysalis    | intel      | impi      | intel-mpi         |
+| chicoma-cpu  | gnu        | mpich     | gnu-cray          |
++--------------+------------+-----------+-------------------+
+| chrysalis    | intel      | openmpi   | ifort             |
 |              |            +-----------+-------------------+
-|              |            | openmpi   | ifort             |
+|              |            | impi      | intel-mpi         |
 |              +------------+-----------+-------------------+
 |              | gnu        | openmpi   | gfortran          |
 +--------------+------------+-----------+-------------------+
@@ -61,11 +63,11 @@ the MPAS model.
 |              +------------+-----------+-------------------+
 |              | gnu        | openmpi   | gfortran          |
 +--------------+------------+-----------+-------------------+
-| cori-haswell | intel      | mpt       | intel-nersc       |
+| cori-haswell | intel      | mpt       | intel-cray        |
 |              +------------+-----------+-------------------+
-|              | gnu        | mpt       | gnu-nersc         |
+|              | gnu        | mpt       | gnu-cray          |
 +--------------+------------+-----------+-------------------+
-| pm-cpu       | gnu        | mpich     | gnu-nersc         |
+| pm-cpu       | gnu        | mpich     | gnu-cray          |
 +--------------+------------+-----------+-------------------+
 
 Below are specifics for each supported machine
@@ -74,6 +76,7 @@ Below are specifics for each supported machine
    :titlesonly:
 
    anvil
+   chicoma
    chrysalis
    compy
    cori
