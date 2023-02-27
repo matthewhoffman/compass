@@ -11,6 +11,7 @@ import matplotlib.tri as tri
 
 targetYear = 20.0  # model year from start at which to calculate statistics
 labelRuns = True
+lw = 0.5  # linewidth for ensemble plots
 
 rhoi = 910.0
 rhosw = 1028.0
@@ -26,6 +27,11 @@ obs_discharge = obs_discharge_thwaites + obs_discharge_haynes
 obs_years = np.arange(1979, 2017+1) - 2000.0
 obs_sigmaD = (3.93**2 + 1.00**2)**0.5  # thwaites + haynes
 
+# obs from Adusumilli et al 2020 Supp Table 1
+obs_melt_yrs = [10, 18]
+obs_melt = 81.1
+obs_melt_unc = 7.4
+
 # initialize param vectors
 vmThresh = np.zeros((nRuns,)) * np.nan
 vmSpdLim = np.zeros((nRuns,)) * np.nan
@@ -36,6 +42,7 @@ grdAreaChangeAll = np.zeros((nRuns,)) * np.nan
 areaChangeAll = np.zeros((nRuns,)) * np.nan
 fltAreaChangeAll = np.zeros((nRuns,)) * np.nan
 GLfluxAll = np.zeros((nRuns,)) * np.nan
+BMBAll = np.zeros((nRuns,)) * np.nan
 
 def get_nl_option(file, option_name):
     with open(file, "r") as fp:
@@ -46,7 +53,7 @@ def get_nl_option(file, option_name):
 
 # time series plot
 figTS = plt.figure(2, figsize=(8, 12), facecolor='w')
-nrow=2
+nrow=3
 ncol=1
 axSLRts = figTS.add_subplot(nrow, ncol, 1)
 #plt.title(f'SLR at year {targetYear} (mm)')
@@ -54,11 +61,17 @@ plt.xlabel('Year')
 plt.ylabel('SLR contribution (mm)')
 plt.grid()
 
-axGLFts = figTS.add_subplot(nrow, ncol, 2)
+axBMBts = figTS.add_subplot(nrow, ncol, 2, sharex=axSLRts)
 plt.xlabel('Year')
-plt.ylabel('GL flux (Gt)')
+plt.ylabel('Ice-shelf basal melt flux (Gt/yr)')
 plt.grid()
-axGLFts.fill_between(obs_years, obs_discharge - 2.0*obs_sigmaD, obs_discharge + 2.0*obs_sigmaD, color='k', alpha=0.1, label='D obs')
+axBMBts.fill_between(obs_melt_yrs, obs_melt - obs_melt_unc, obs_melt + obs_melt_unc, color='k', alpha=0.8, label='melt obs')
+
+axGLFts = figTS.add_subplot(nrow, ncol, 3, sharex=axSLRts)
+plt.xlabel('Year')
+plt.ylabel('GL flux (Gt/yr)')
+plt.grid()
+axGLFts.fill_between(obs_years, obs_discharge - 2.0*obs_sigmaD, obs_discharge + 2.0*obs_sigmaD, color='k', alpha=0.8, label='D obs')
 
 # maps
 figMaps = plt.figure(3, figsize=(8, 12), facecolor='w')
@@ -66,7 +79,13 @@ nrow=2
 ncol=1
 axMaps = figMaps.add_subplot(nrow, ncol, 1)
 axMaps.axis('equal')
+axMaps2 = figMaps.add_subplot(nrow, ncol, 2)
+axMaps2.axis('equal')
 
+firstMap = True
+
+GLX = np.array([])
+GLY = np.array([])
 
 for idx, run in enumerate(runs):
     print(f'Analyzing {run}')
@@ -95,11 +114,13 @@ for idx, run in enumerate(runs):
         VAF = f.variables['volumeAboveFloatation'][:]
         SLR = (VAF[0] - VAF) / 3.62e14 * rhoi / rhosw * 1000.
         groundingLineFlux = f.variables['groundingLineFlux'][:] / 1.0e12  # in Gt
+        BMB = f.variables['totalFloatingBasalMassBal'][:] / -1.0e12  # in Gt
 
 
         # plot time series
-        axSLRts.plot(years, SLR)
-        axGLFts.plot(years[1:], groundingLineFlux[1:])  # ignore first entry which is 0
+        axSLRts.plot(years, SLR, linewidth=lw)
+        axGLFts.plot(years[1:], groundingLineFlux[1:], linewidth=lw)  # ignore first entry which is 0
+        axBMBts.plot(years[1:], BMB[1:], linewidth=lw)  # ignore first entry which is 0
 
         # Only process runs that have reached target year
         indices = np.nonzero(years >= targetYear)[0]
@@ -132,26 +153,29 @@ for idx, run in enumerate(runs):
             yCell = DS['yCell'].values[0,:]
 
             triang = tri.Triangulation(xCell, yCell)
-
-
-            axMaps.tricontour(triang, thickness[0], [1.0], colors='k')
-            axMaps.tricontour(triang, thickness[ii], [1.0], colors='r')
-
-            ii5 = np.nonzero(yearsOutput >= 10.0)[0][0]
-
-            grd0 = ((thickness[0,:]*910.0/1028.0+bedTopo[0,:])>0.0)*(thickness[0,:]>0.0)
-            grd5 = ((thickness[ii5,:]*910.0/1028.0+bedTopo[ii5,:])>0.0)*(thickness[ii5,:]>0.0)
             grd = ((thickness[ii,:]*910.0/1028.0+bedTopo[ii,:])>0.0)*(thickness[ii,:]>0.0)
-            axMaps.tricontour(triang, grd0, [0.5], colors='k')
-            axMaps.tricontour(triang, grd5, [0.5], colors='c')
-            axMaps.tricontour(triang, grd, [0.5], colors='b')
 
+            if firstMap is True:
+                firstMap = False
+                axMaps.tricontour(triang, thickness[0], [1.0], colors='k', linewidths=3)
+                grd0 = ((thickness[0,:]*910.0/1028.0+bedTopo[0,:])>0.0)*(thickness[0,:]>0.0)
+                axMaps.tricontour(triang, grd0, [0.5], colors='k', linewidths=3)
 
+            axMaps.tricontour(triang, thickness[ii], [1.0], colors='r', linewidths=lw)
+            grdcontourset = axMaps.tricontour(triang, grd, [0.5], colors='b', linewidths=lw)
 
+            GLX = np.append(GLX, grdcontourset.allsegs[0][0][:,0])
+            GLY = np.append(GLY, grdcontourset.allsegs[0][0][:,1])
 
+            #ii5 = np.nonzero(yearsOutput >= 5.0)[0][0]
+            #grd5 = ((thickness[ii5,:]*910.0/1028.0+bedTopo[ii5,:])>0.0)*(thickness[ii5,:]>0.0)
+            #axMaps.tricontour(triang, grd5, [0.5], colors='c', linewidths=lw)
         f.close()
 
 # plot results
+#axMaps2.plot(GLX, GLY, '.')
+axMaps2.hist2d(GLX, GLY, (50,50))#, cmap=plt.cm.jet)
+
 
 markerSize = 100
 

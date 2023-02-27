@@ -98,11 +98,21 @@ class ThwaitesEnsemble(TestCase):
 
         # gamma0
         # Currently set to a constant value, but likely to be added later
-        gamma0_vec = 14477.3367602277 * np.ones((max_samples,))
+        #gamma0_vec = 14477.3367602277 * np.ones((max_samples,))
+        gamma0_idx = 2
+        gamma0_range = [9620.0, 21000.0]
+        gamma0_vec = param_unit_values[:,gamma0_idx] * \
+                (gamma0_range[1] - gamma0_range[0]) + \
+                gamma0_range[0]
 
         # deltaT
         # Currently set to a constant value, but likely to be added later
-        deltaT_vec = 1.06652677059174 * np.ones((max_samples,))
+        #deltaT_vec = 1.06652677059174 * np.ones((max_samples,))
+        deltaT_idx = 3
+        deltaT_range = [-2.0, 4.0]
+        deltaT_vec = param_unit_values[:,deltaT_idx] * \
+                (deltaT_range[1] - deltaT_range[0]) + \
+                deltaT_range[0]
 
         # add runs as steps based on the run range requested
         if self.end_run > max_samples:

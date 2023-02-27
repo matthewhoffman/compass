@@ -25,6 +25,7 @@ def get_available_cores_and_nodes(config):
     """
 
     parallel_system = config.get('parallel', 'system')
+    parallel_system = 'single_node'
     if parallel_system == 'slurm':
         job_id = os.environ['SLURM_JOB_ID']
         node = os.environ['SLURMD_NODENAME']
@@ -76,8 +77,9 @@ def check_parallel_system(config):
     parallel_system = config.get('parallel', 'system')
     if parallel_system == 'slurm':
         if 'SLURM_JOB_ID' not in os.environ:
-            raise ValueError('SLURM_JOB_ID not defined.  You are likely not '
-                             'on a compute node.')
+            pass
+            #raise ValueError('SLURM_JOB_ID not defined.  You are likely not '
+            #                 'on a compute node.')
     elif parallel_system == 'single_node':
         pass
     else:
