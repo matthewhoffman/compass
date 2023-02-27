@@ -36,6 +36,9 @@ obs_melt_unc = 7.4
 vmThresh = np.zeros((nRuns,)) * np.nan
 vmSpdLim = np.zeros((nRuns,)) * np.nan
 fricExp = np.zeros((nRuns,)) * np.nan
+gamma0 = np.zeros((nRuns,)) * np.nan
+deltaT = np.zeros((nRuns,)) * np.nan
+
 # initialize QOIs
 SLRAll = np.zeros((nRuns,)) * np.nan
 grdAreaChangeAll = np.zeros((nRuns,)) * np.nan
@@ -105,6 +108,16 @@ for idx, run in enumerate(runs):
         except yaml.YAMLError as exc:
             print(exc)
     fricExp[idx] = loaded['ANONYMOUS']['Problem']['LandIce BCs']['BC 0']['Basal Friction Coefficient']['Power Exponent']
+
+    # get ocean params
+    focn_list = glob.glob(run + "/Thwaites_4to20km_r02_20230126_basin_and_coeff_gamma0_DeltaT_quadratic_non_local_median*.nc")
+    if len(focn_list) != 1:
+        sys.exit(f"Error: ocean parameter file not found for run {run}")
+    focn_path = focn_list[0]
+    focn = netCDF4.Dataset(focn_path, 'r')
+    gamma0[idx] = focn.variables['ismip6shelfMelt_gamma0'][0]
+    deltaT[idx] = focn.variables['ismip6shelfMelt_deltaT'][0]  # all entries should have same value
+    focn.close()
 
     fpath = run + "/output/globalStats.nc"
     if os.path.exists(fpath):
@@ -188,7 +201,7 @@ plt.title(f'SLR at year {targetYear} (mm)')
 plt.xlabel('von Mises stress threshold (kPa)')
 plt.ylabel('basal friction law exponent')
 plt.grid()
-plt.scatter(vmThresh, fricExp, s=markerSize, c=SLRAll, plotnonfinite=False)
+plt.scatter(vmThresh, fricExp, s=markerSize, c=SLRAll, plotnonfinite=False, vmax=8.5)
 if labelRuns:
     for i in range(nRuns):
         plt.annotate(f'{runs[i][3:]}', (vmThresh[i], fricExp[i]))
@@ -231,11 +244,61 @@ plt.title(f'Grounding line flux at year {targetYear} (Gt)')
 plt.xlabel('von Mises stress threshold (kPa)')
 plt.ylabel('basal friction law exponent')
 plt.grid()
-plt.scatter(vmThresh, fricExp, s=markerSize, c=GLfluxAll, plotnonfinite=False)
+plt.scatter(vmThresh, fricExp, s=markerSize, c=GLfluxAll, plotnonfinite=False, vmax=250)
 badIdx = np.nonzero(np.isnan(GLfluxAll))[0]
 plt.plot(vmThresh[badIdx], fricExp[badIdx], 'kx')
 plt.colorbar()
 
 
 fig.tight_layout()
+
+fig = plt.figure(100, figsize=(14, 11), facecolor='w')
+nrow=2
+ncol=2
+
+axSLR = fig.add_subplot(nrow, ncol, 1)
+plt.title(f'SLR at year {targetYear} (mm)')
+plt.xlabel('gamma0')
+plt.ylabel('deltaT')
+plt.grid()
+plt.scatter(gamma0, deltaT, s=markerSize, c=SLRAll, plotnonfinite=False, vmax=8.5)
+if labelRuns:
+    for i in range(nRuns):
+        plt.annotate(f'{runs[i][3:]}', (vmThresh[i], fricExp[i]))
+#badIdx = np.nonzero(np.isnan(SLRAll))[0]
+#plt.plot(vmThresh[badIdx], fricExp[badIdx], 'kx')
+plt.colorbar()
+
+axArea = fig.add_subplot(nrow, ncol, 2)
+plt.title(f'Total area change at year {targetYear} (km$^2$)')
+plt.xlabel('gamma0')
+plt.ylabel('deltaT')
+plt.grid()
+plt.scatter(gamma0, deltaT, s=markerSize, c=areaChangeAll, plotnonfinite=False)
+#badIdx = np.nonzero(np.isnan(areaChangeAll))[0]
+#plt.plot(vmThresh[badIdx], fricExp[badIdx], 'kx')
+plt.colorbar()
+
+axGrdArea = fig.add_subplot(nrow, ncol, 3)
+plt.title(f'Grounded area change at year {targetYear} (km$^2$)')
+plt.xlabel('gamma0')
+plt.ylabel('deltaT')
+plt.grid()
+plt.scatter(gamma0, deltaT, s=markerSize, c=grdAreaChangeAll, plotnonfinite=False)
+#badIdx = np.nonzero(np.isnan(grdAreaChangeAll))[0]
+#plt.plot(vmThresh[badIdx], fricExp[badIdx], 'kx')
+plt.colorbar()
+
+axGLflux = fig.add_subplot(nrow, ncol, 4)
+plt.title(f'Grounding line flux at year {targetYear} (Gt)')
+plt.xlabel('gamma0')
+plt.ylabel('deltaT')
+plt.grid()
+plt.scatter(gamma0, deltaT, s=markerSize, c=GLfluxAll, plotnonfinite=False, vmax=250)
+#badIdx = np.nonzero(np.isnan(GLfluxAll))[0]
+#plt.plot(vmThresh[badIdx], fricExp[badIdx], 'kx')
+plt.colorbar()
+
+fig.tight_layout()
+
 plt.show()
