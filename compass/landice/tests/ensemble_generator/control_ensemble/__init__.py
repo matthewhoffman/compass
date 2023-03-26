@@ -228,7 +228,6 @@ class Ensemble(TestCase):
                      "sample size available in param_vector_filename")
         for run_num in range(self.start_run, self.end_run + 1):
             self.add_step(EnsembleMember(test_case=self, run_num=run_num,
-                          test_resources_location='compass.landice.tests.ensemble_generator.ensemble',  # noqa
                           basal_fric_exp=basal_fric_exp_vec[run_num],
                           mu_scale=mu_scale_vec[run_num],
                           stiff_scale=stiff_scale_vec[run_num],
