@@ -65,7 +65,8 @@ class EnsembleMember(Step):
                  von_mises_threshold=None,
                  calv_spd_lim=None,
                  gamma0=None,
-                 deltaT=None):
+                 deltaT=None,
+                 smb_scale=None):
         """
         Creates a new run within an ensemble
 
@@ -101,6 +102,9 @@ class EnsembleMember(Step):
 
         deltaT : float
             value of deltaT to use in ISMIP6 ice-shelf basal melt param.
+
+        smb_scale : float
+            value to scale SMB by
         """
         self.run_num = run_num
         self.test_resources_location = test_resources_location
@@ -113,6 +117,7 @@ class EnsembleMember(Step):
         self.calv_spd_lim = calv_spd_lim
         self.gamma0 = gamma0
         self.deltaT = deltaT
+        self.smb_scale = smb_scale
 
         # define step (run) name
         self.name = f'run{run_num:03}'
@@ -236,11 +241,23 @@ class EnsembleMember(Step):
         if self.deltaT is not None:
             run_info_cfg.set('run_info', 'deltaT', f'{self.deltaT}')
 
+        # scale on SMB
+        SMB_file_path = section.get('SMB_file_path')
+        base_smb_fname = SMB_file_path.split('.')[:-1][0]
+        new_smb_fname = f'{base_smb_fname}_MODIFIED.nc'
+        shutil.copy(SMB_file_path, os.path.join(self.work_dir,
+                                                new_smb_fname))
+        stream_replacements['SMB_file_path'] = new_smb_fname
+        if self.smb_scale is not None:
+            f = netCDF4.Dataset(os.path.join(self.work_dir, new_smb_fname),
+                                'r+')
+            f.variables['sfcMassBal'][:] *= self.smb_scale
+            f.close()
+            run_info_cfg.set('run_info', 'smb_scale', f'{self.smb_scale}')
+
         # set up forcing files (unmodified)
         TF_file_path = section.get('TF_file_path')
         stream_replacements['TF_file_path'] = TF_file_path
-        SMB_file_path = section.get('SMB_file_path')
-        stream_replacements['SMB_file_path'] = SMB_file_path
 
         # store accumulated namelist and streams options
         self.add_namelist_options(options=options,

@@ -82,6 +82,7 @@ class Ensemble(TestCase):
         use_calv_limit = self.config.getboolean('ensemble', 'use_calv_limit')
         use_gamma0 = self.config.getboolean('ensemble', 'use_gamma0')
         use_meltflux = self.config.getboolean('ensemble', 'use_meltflux')
+        use_smb_scale = self.config.getboolean('ensemble', 'use_smb_scale')
 
         n_params = (use_fric_exp + use_mu_scale + use_stiff_scale +
                     use_von_mises_threshold + use_calv_limit + use_gamma0 +
@@ -222,6 +223,17 @@ class Ensemble(TestCase):
         else:
             deltaT_vec = [None] * max_samples
 
+        # smb scale
+        if use_smb_scale:
+            print('Including scaling of SMB')
+            minval = self.config.getfloat('ensemble', 'smb_scale_min')
+            maxval = self.config.getfloat('ensemble', 'smb_scale_max')
+            smb_scale_vec = param_unit_values[:, idx] * \
+                (maxval - minval) + minval
+            idx += 1
+        else:
+            smb_scale_vec = [None] * max_samples
+
         # add runs as steps based on the run range requested
         if self.end_run > max_samples:
             sys.exit("Error: end_run specified in config exceeds maximum "
@@ -235,7 +247,8 @@ class Ensemble(TestCase):
                           von_mises_threshold=von_mises_threshold_vec[run_num],
                           calv_spd_lim=calv_spd_lim_vec[run_num],
                           gamma0=gamma0_vec[run_num],
-                          deltaT=deltaT_vec[run_num]))
+                          deltaT=deltaT_vec[run_num]),
+                          smb_scale=smb_scale_vec[run_num])
             # Note: do not add to steps_to_run, because ensemble_manager
             # will handle submitting and running the runs
 
