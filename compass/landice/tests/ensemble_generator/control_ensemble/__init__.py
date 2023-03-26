@@ -66,22 +66,24 @@ class Ensemble(TestCase):
         latent_heat_ice = 335.0e3
         sec_in_yr = 3600.0 * 24.0 * 365.0
 
+        section = self.config['ensemble']
+
         # Determine start and end run numbers being requested
-        self.start_run = self.config.getint('ensemble', 'start_run')
-        self.end_run = self.config.getint('ensemble', 'end_run')
+        self.start_run = section.getint('ensemble', 'start_run')
+        self.end_run = section.getint('ensemble', 'end_run')
 
         # Define parameters being sampled and their ranges
 
         # Determine how many and which parameters are being used
-        use_fric_exp = self.config.getboolean('ensemble', 'use_fric_exp')
-        use_mu_scale = self.config.getboolean('ensemble', 'use_mu_scale')
-        use_stiff_scale = self.config.getboolean('ensemble',
-                                                 'use_stiff_scale')
-        use_von_mises_threshold = self.config.getboolean(
+        use_fric_exp = section.getboolean('ensemble', 'use_fric_exp')
+        use_mu_scale = section.getboolean('ensemble', 'use_mu_scale')
+        use_stiff_scale = section.getboolean('ensemble',
+                                             'use_stiff_scale')
+        use_von_mises_threshold = section.getboolean(
             'ensemble', 'use_von_mises_threshold')
-        use_calv_limit = self.config.getboolean('ensemble', 'use_calv_limit')
-        use_gamma0 = self.config.getboolean('ensemble', 'use_gamma0')
-        use_meltflux = self.config.getboolean('ensemble', 'use_meltflux')
+        use_calv_limit = section.getboolean('ensemble', 'use_calv_limit')
+        use_gamma0 = section.getboolean('ensemble', 'use_gamma0')
+        use_meltflux = section.getboolean('ensemble', 'use_meltflux')
 
         n_params = (use_fric_exp + use_mu_scale + use_stiff_scale +
                     use_von_mises_threshold + use_calv_limit + use_gamma0 +
@@ -90,8 +92,8 @@ class Ensemble(TestCase):
             sys.exit("ERROR: At least one parameter must be specified.")
 
         # Generate unit parameter vectors - either uniform or Sobol
-        sampling_method = self.config.get('ensemble', 'sampling_method')
-        max_samples = self.config.getint('ensemble', 'max_samples')
+        sampling_method = section.get('ensemble', 'sampling_method')
+        max_samples = section.getint('ensemble', 'max_samples')
         if max_samples < self.end_run:
             sys.exit("ERROR: max_samples is exceeded by end_run")
         if sampling_method == 'sobol':
@@ -112,8 +114,8 @@ class Ensemble(TestCase):
         # basal fric exp
         if use_fric_exp:
             print('Including basal friction exponent')
-            minval = self.config.getfloat('ensemble', 'fric_exp_min')
-            maxval = self.config.getfloat('ensemble', 'fric_exp_max')
+            minval = section.getfloat('ensemble', 'fric_exp_min')
+            maxval = section.getfloat('ensemble', 'fric_exp_max')
             basal_fric_exp_vec = param_unit_values[:, idx] * \
                 (maxval - minval) + minval
             idx += 1
@@ -123,8 +125,8 @@ class Ensemble(TestCase):
         # mu scale
         if use_mu_scale:
             print('Including scaling of muFriction')
-            minval = self.config.getfloat('ensemble', 'mu_scale_min')
-            maxval = self.config.getfloat('ensemble', 'mu_scale_max')
+            minval = section.getfloat('ensemble', 'mu_scale_min')
+            maxval = section.getfloat('ensemble', 'mu_scale_max')
             mu_scale_vec = param_unit_values[:, idx] * \
                 (maxval - minval) + minval
             idx += 1
@@ -134,8 +136,8 @@ class Ensemble(TestCase):
         # stiff scale
         if use_stiff_scale:
             print('Including scaling of stiffnessFactor')
-            minval = self.config.getfloat('ensemble', 'stiff_scale_min')
-            maxval = self.config.getfloat('ensemble', 'stiff_scale_max')
+            minval = section.getfloat('ensemble', 'stiff_scale_min')
+            maxval = section.getfloat('ensemble', 'stiff_scale_max')
             stiff_scale_vec = param_unit_values[:, idx] * \
                 (maxval - minval) + minval
             idx += 1
@@ -145,10 +147,10 @@ class Ensemble(TestCase):
         # von mises threshold stress
         if use_von_mises_threshold:
             print('Including von_mises_threshold')
-            minval = self.config.getfloat('ensemble',
-                                          'von_mises_threshold_min')
-            maxval = self.config.getfloat('ensemble',
-                                          'von_mises_threshold_max')
+            minval = section.getfloat('ensemble',
+                                      'von_mises_threshold_min')
+            maxval = section.getfloat('ensemble',
+                                      'von_mises_threshold_max')
             von_mises_threshold_vec = param_unit_values[:, idx] * \
                 (maxval - minval) + minval
             idx += 1
@@ -158,8 +160,8 @@ class Ensemble(TestCase):
         # calving speed limit
         if use_calv_limit:
             print('Including calving speed limit')
-            minval = self.config.getfloat('ensemble', 'calv_limit_min')
-            maxval = self.config.getfloat('ensemble', 'calv_limit_max')
+            minval = section.getfloat('ensemble', 'calv_limit_min')
+            maxval = section.getfloat('ensemble', 'calv_limit_max')
             calv_spd_lim_vec = param_unit_values[:, idx] * \
                 (maxval - minval) + minval
             calv_spd_lim_vec /= sec_in_yr  # convert from m/yr to s/yr
@@ -171,8 +173,8 @@ class Ensemble(TestCase):
         if use_gamma0:
             print('Including gamma0')
             # gamma0
-            minval = self.config.getfloat('ensemble', 'gamma0_min')
-            maxval = self.config.getfloat('ensemble', 'gamma0_max')
+            minval = section.getfloat('ensemble', 'gamma0_min')
+            maxval = section.getfloat('ensemble', 'gamma0_max')
             gamma0_vec = param_unit_values[:, idx] * \
                 (maxval - minval) + minval
             idx += 1
@@ -182,16 +184,15 @@ class Ensemble(TestCase):
         # melt flux
         if use_meltflux:
             # melt flux
-            minval = self.config.getfloat('ensemble', 'meltflux_min')
-            maxval = self.config.getfloat('ensemble', 'meltflux_max')
+            minval = section.getfloat('ensemble', 'meltflux_min')
+            maxval = section.getfloat('ensemble', 'meltflux_max')
             meltflux_vec = param_unit_values[:, idx] * \
                 (maxval - minval) + minval
             idx += 1
-            iceshelf_area_obs = self.config.getfloat('ensemble',
-                                                     'iceshelf_area_obs')
+            iceshelf_area_obs = section.getfloat('ensemble',
+                                                 'iceshelf_area_obs')
 
             # deltaT
-            section = self.config['ensemble']
             input_file_path = section.get('input_file_path')
             TF_file_path = section.get('TF_file_path')
             mean_TF, iceshelf_area = calc_mean_TF(input_file_path,
