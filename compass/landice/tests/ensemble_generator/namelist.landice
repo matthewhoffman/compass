@@ -27,7 +27,8 @@
 
     config_basal_mass_bal_float = 'ismip6'
     config_front_mass_bal_grounded = 'ismip6'
-    config_use_3d_thermal_forcing_for_face_melt = .true.
+    config_use_3d_thermal_forcing_for_face_melt = .false.
+    config_subglacial_discharge_intercept = 0.15
 
     config_ice_density = 910.0
     config_ocean_density = 1028.0
@@ -41,8 +42,8 @@
 
     config_do_restart = .false.
     config_restart_timestamp_name = 'restart_timestamp'
-    config_start_time = '2000-01-01_00:00:00'
-    config_stop_time = '2200-01-01_00:00:00'
+    config_start_time = '2007-07-01_00:00:00'
+    config_stop_time = '2200-07-01_00:00:00'
 
     config_pio_num_iotasks = 1
     config_pio_stride = 32
