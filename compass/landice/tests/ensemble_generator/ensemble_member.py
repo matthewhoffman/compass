@@ -264,7 +264,7 @@ class EnsembleMember(Step):
         SMB_file_path = section.get('SMB_file_path')
         stream_replacements['SMB_file_path'] = SMB_file_path
         runoff_file_path = section.get('runoff_file_path')
-        stream_replacements['funoff_file_path'] = runoff_file_path
+        stream_replacements['runoff_file_path'] = runoff_file_path
 
         # store accumulated namelist and streams options
         self.add_namelist_options(options=options,
