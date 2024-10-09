@@ -76,7 +76,7 @@ class SpinupEnsemble(TestCase):
         # Define parameters being sampled and their ranges
         param_list = ['fric_exp', 'mu_scale', 'stiff_scale',
                       'von_mises_threshold', 'calv_limit', 'gamma0',
-                      'meltflux']
+                      'meltflux', 'facemelt_B']
 
         # Determine how many and which parameters are being used
         n_params = 0
@@ -182,7 +182,8 @@ class SpinupEnsemble(TestCase):
                 calv_spd_lim=param_dict['calv_limit']['vec'][run_num],
                 gamma0=param_dict['gamma0']['vec'][run_num],
                 meltflux=param_dict['meltflux']['vec'][run_num],
-                deltaT=deltaT_vec[run_num]))
+                deltaT=deltaT_vec[run_num],
+                facemelt_B=param_dict['facemelt_B']['vec'][run_num]))
             # Note: do not add to steps_to_run, because ensemble_manager
             # will handle submitting and running the runs
 

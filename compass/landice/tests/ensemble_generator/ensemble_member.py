@@ -58,10 +58,12 @@ class EnsembleMember(Step):
                  mu_scale=None,
                  stiff_scale=None,
                  von_mises_threshold=None,
+                 von_mises_threshold_grd=None,
                  calv_spd_lim=None,
                  gamma0=None,
                  meltflux=None,
-                 deltaT=None):
+                 deltaT=None,
+                 facemelt_B=None):
         """
         Creates a new run within an ensemble
 
@@ -102,10 +104,12 @@ class EnsembleMember(Step):
         self.mu_scale = mu_scale
         self.stiff_scale = stiff_scale
         self.von_mises_threshold = von_mises_threshold
+        self.von_mises_threshold_grd = von_mises_threshold_grd
         self.calv_spd_lim = calv_spd_lim
         self.gamma0 = gamma0
         self.meltflux = meltflux
         self.deltaT = deltaT
+        self.facemelt_B = facemelt_B
 
         # define step (run) name
         self.name = f'run{run_num:03}'
@@ -173,12 +177,24 @@ class EnsembleMember(Step):
 
         # von Mises stress threshold
         if self.von_mises_threshold is not None:
-            options['config_grounded_von_Mises_threshold_stress'] = \
-                f'{self.von_mises_threshold}'
             options['config_floating_von_Mises_threshold_stress'] = \
                 f'{self.von_mises_threshold}'
             run_info_cfg.set('run_info', 'von_mises_threshold',
                              f'{self.von_mises_threshold}')
+
+        # grounded von Mises stress threshold
+        if self.von_mises_threshold_grd is not None:
+            options['config_grounded_von_Mises_threshold_stress'] = \
+                f'{self.von_mises_threshold_grd}'
+            run_info_cfg.set('run_info', 'von_mises_threshold_grd',
+                             f'{self.von_mises_threshold_grd}')
+
+        # facemelt B
+        if self.facemelt_B is not None:
+            options['config_subglacial_discharge_intercept'] = \
+                f'{self.facemelt_B}'
+            run_info_cfg.set('run_info', 'facemelt_B',
+                             f'{self.facemelt_B}')
 
         # calving speed limit
         if self.calv_spd_lim is not None:
