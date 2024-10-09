@@ -54,6 +54,16 @@
         <var name="ismip6shelfMelt_deltaT"/>
 </stream>
 
+<stream name="runoff_forcing"
+        type="input"
+        mode="forward;analysis"
+        input_interval="initial_only"
+        reference_time="2000-07-01_00:00:00"
+        filename_template="{{ runoff_file_path }}"
+        runtime_format="single_file">
+        <var name="ismip6Runoff"/>
+</stream>
+
 <stream name="output"
         type="output"
         reference_time="2000-07-01_00:00:00"
