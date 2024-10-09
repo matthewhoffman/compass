@@ -12,10 +12,8 @@ ANONYMOUS:
           Type: Power Law
           Power Exponent: 0.2
           Mu Type: Field
-          Effective Pressure Type: Constant
-          Effective Pressure: 1.0
-          #Zero Effective Pressure On Floating Ice At Nodes: true
-          Zero Beta On Floating Ice: true
+          Effective Pressure Type: Hydrostatic Computed at Nodes
+          Zero Effective Pressure On Floating Ice At Nodes: true
 
     Cubature Degree: 4
     Basal Cubature Degree: 8
@@ -63,7 +61,7 @@ ANONYMOUS:
       Direction:
         Method: Newton
         Newton:
-          Forcing Term Method: Constant
+          Forcing Term Method: Type 2
           Rescue Bad Newton Solve: true
           Linear Solver:
             Write Linear System: false
