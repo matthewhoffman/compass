@@ -75,7 +75,8 @@ class SpinupEnsemble(TestCase):
 
         # Define parameters being sampled and their ranges
         param_list = ['fric_exp', 'mu_scale', 'stiff_scale',
-                      'von_mises_threshold', 'calv_limit', 'gamma0',
+                      'von_mises_threshold', 'von_mises_threshold_grd',
+                      'calv_limit', 'gamma0',
                       'meltflux', 'facemelt_B']
 
         # Determine how many and which parameters are being used
@@ -179,6 +180,7 @@ class SpinupEnsemble(TestCase):
                 mu_scale=param_dict['mu_scale']['vec'][run_num],
                 stiff_scale=param_dict['stiff_scale']['vec'][run_num],
                 von_mises_threshold=param_dict['von_mises_threshold']['vec'][run_num],  # noqa
+                von_mises_threshold_grd=param_dict['von_mises_threshold_grd']['vec'][run_num],  # noqa
                 calv_spd_lim=param_dict['calv_limit']['vec'][run_num],
                 gamma0=param_dict['gamma0']['vec'][run_num],
                 meltflux=param_dict['meltflux']['vec'][run_num],
