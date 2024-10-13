@@ -1,6 +1,9 @@
 from compass.landice.tests.ismip6_run.ismip6_ais_proj2300 import (
     Ismip6AisProj2300,
 )
+from compass.landice.tests.ismip6_run.ismip6_ais_proj2300_tp_branches import (
+    Ismip6AisProj2300TpBranches,
+)
 from compass.testgroup import TestGroup
 
 
@@ -20,3 +23,5 @@ class Ismip6Run(TestGroup):
         super().__init__(mpas_core=mpas_core, name='ismip6_run')
 
         self.add_test_case(Ismip6AisProj2300(test_group=self))
+
+        self.add_test_case(Ismip6AisProj2300TpBranches(test_group=self))
