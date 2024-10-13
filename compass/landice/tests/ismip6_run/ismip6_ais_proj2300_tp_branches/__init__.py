@@ -3,8 +3,7 @@ import os
 import numpy as np
 
 from compass.landice.tests.ismip6_run.ismip6_ais_proj2300_tp_branches.set_up_branches import (  # noqa
-    InitialClimateBranch,
-    SteadyClimateBranch,
+    climateBranch,
 )
 from compass.testcase import TestCase
 
@@ -45,11 +44,13 @@ class Ismip6AisProj2300TpBranches(TestCase):
 
         # create steady climate branch runs
         for yr in branch_points:
-            self.add_step(SteadyClimateBranch(test_case=self, branch_year=yr))
+            self.add_step(climateBranch(test_case=self, branch_type='stable',
+                                        branch_year=yr))
 
         # create initial climate branch runs
-        # for yr in np.arange(2000, 2300, branch_interval):
-        #     self.add_step(InitialClimateBranch(test_case=self, year=yr))
+        for yr in branch_points:
+            self.add_step(climateBranch(test_case=self, branch_type='return',
+                                        branch_year=yr))
 
     def run(self):
         """
