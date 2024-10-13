@@ -1,6 +1,7 @@
 import glob
 import os
 import shutil
+import sys
 
 from lxml import etree
 
@@ -14,21 +15,25 @@ from compass.model import make_graph_file, run_model
 from compass.step import Step
 
 
-class SteadyClimateBranch(Step):
+class climateBranch(Step):
     """
     """
-    def __init__(self, test_case, branch_year):
+    def __init__(self, test_case, branch_type, branch_year):
         """
         """
-        self.name = f'steady_branch_{branch_year}'
+        if branch_type not in ['stable', 'return']:
+            sys.exit(f'"branch_type" unknown: {branch_type}')
+        self.branch_type = branch_type
         self.branch_year = branch_year
+        self.name = f'{branch_type}_{branch_year}'
 
         super().__init__(test_case=test_case, name=self.name)
 
     def setup(self):
         """
         """
-        print(f'Setting up steady climate branch year {self.branch_year}')
+        print(f'Setting up {self.branch_type} climate',
+              f'branch year {self.branch_year}')
 
         config = self.config
         section = config['ismip6_ais_proj2300_tp_branches']
@@ -86,18 +91,25 @@ class SteadyClimateBranch(Step):
         etree.indent(tree, space="    ", level=0)
         tree.write(os.path.join(self.work_dir, 'streams.landice'))
 
+        if self.branch_type == 'stable':
+            refyear = self.branch_year
+        elif self.branch_type == 'return':
+            refyear = 2000
+        else:
+            sys.exit(f'"branch_type" unknown: {self.branch_type}')
+
         # create custom smb forcing file
         resample_forcing(os.path.join(base_exp_dir, smb_fname),
                          os.path.join(self.work_dir, 'resampled_smb.nc'),
-                         self.branch_year - 5,
-                         self.branch_year + 5,
+                         refyear - 5,
+                         refyear + 5,
                          self.branch_year, 2301)
 
         # create custom tf forcing file
         resample_forcing(os.path.join(base_exp_dir, tf_fname),
                          os.path.join(self.work_dir, 'resampled_tf.nc'),
-                         self.branch_year - 5,
-                         self.branch_year + 5,
+                         refyear - 5,
+                         refyear + 5,
                          self.branch_year, 2301)
 
         # copy graph files
@@ -109,7 +121,7 @@ class SteadyClimateBranch(Step):
         # set job name to run number so it will get set in batch script
         # Note: currently, for this to work right, one has to delete/comment
         # the call to write_job_script at line 316-7 in compass/setup.py
-        self.config.set('job', 'job_name', f'steady_{self.branch_year}')
+        self.config.set('job', 'job_name', self.name)
         machine = self.config.get('deploy', 'machine')
         pre_run_cmd = ('LOGDIR=previous_logs_`date +"%Y-%m-%d_%H-%M-%S"`;'
                        'mkdir $LOGDIR; cp log* $LOGDIR; date')
@@ -137,28 +149,4 @@ class SteadyClimateBranch(Step):
 
         make_graph_file(mesh_filename=f'rst.{self.branch_year}-01-01.nc',
                         graph_filename='graph.info')
-        run_model(self)
-
-
-class InitialClimateBranch(Step):
-    """
-    """
-    def __init__(self, test_case, branch_year):
-        """
-        """
-        self.branch_year = branch_year
-
-        super().__init__(test_case=test_case, name=self.name)
-
-    def setup(self):
-        """
-        """
-        print(f'Setting up initial climate branch year {self.branch_year}')
-
-    def run(self):
-        """
-        Run this member of the ensemble.
-        Eventually we want this function to handle restarts.
-        """
-
         run_model(self)
