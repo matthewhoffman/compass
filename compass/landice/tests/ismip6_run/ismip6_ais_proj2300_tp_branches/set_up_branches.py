@@ -2,12 +2,14 @@ import glob
 import os
 import shutil
 
-import netCDF4
 from lxml import etree
 
 import compass
 from compass.io import symlink
 from compass.job import write_job_script
+from compass.landice.tests.ismip6_run.ismip6_ais_proj2300_tp_branches.resample_forcing import (  # noqa
+    resample_forcing,
+)
 from compass.model import make_graph_file, run_model
 from compass.step import Step
 
@@ -71,74 +73,32 @@ class SteadyClimateBranch(Step):
         for child in root:
             if child.get('name') == 'ismip6_smb':
                 smb_fname = child.get('filename_template')
-                child.set('filename_template', 'steady_smb.nc')
+                child.set('filename_template', 'resampled_smb.nc')
                 child.set('reference_time',
                           f"{self.branch_year:04}-01-01_00:00:00")
-                child.set('input_interval', "1000-00-00_00:00:00")
+                child.set('input_interval', "0001-00-00_00:00:00")
             if child.get('name') == 'ismip6_TF':
                 tf_fname = child.get('filename_template')
-                child.set('filename_template', 'steady_tf.nc')
+                child.set('filename_template', 'resampled_tf.nc')
                 child.set('reference_time',
                           f"{self.branch_year:04}-01-01_00:00:00")
-                child.set('input_interval', "1000-00-00_00:00:00")
+                child.set('input_interval', "0001-00-00_00:00:00")
         etree.indent(tree, space="    ", level=0)
         tree.write(os.path.join(self.work_dir, 'streams.landice'))
 
         # create custom smb forcing file
-        f = netCDF4.Dataset(os.path.join(base_exp_dir, smb_fname), 'r')
-        f.set_auto_maskandscale(False)
-        f.set_auto_chartostring(False)
-        xtime = f.variables['xtime'][:]
-        xtimestr = netCDF4.chartostring(xtime)
-        for t in range(len(xtimestr)):
-            if xtimestr[t][0:4] == str(self.branch_year):
-                ind = t
-                break
-        outFile = netCDF4.Dataset(os.path.join(self.work_dir,
-                                               'steady_smb.nc'),
-                                  'w', format='NETCDF4')
-        outFile.createDimension('Time', 1)
-        outFile.createDimension('StrLen', 64)
-        outFile.createDimension('nCells', len(f.dimensions['nCells']))
-        outFile.createVariable('sfcMassBal', 'f8', ('Time', 'nCells'))
-        outFile.variables['sfcMassBal'][0, :] = \
-            f.variables['sfcMassBal'][ind, :]
-        outFile.createVariable('xtime', 'c', ('Time', 'StrLen'))
-        outFile.variables['xtime'][0, :] = \
-            netCDF4.stringtoarr(xtimestr[ind], 64)
-        outFile.close()
-        f.close()
+        resample_forcing(os.path.join(base_exp_dir, smb_fname),
+                         os.path.join(self.work_dir, 'resampled_smb.nc'),
+                         self.branch_year - 5,
+                         self.branch_year + 5,
+                         self.branch_year, 2301)
 
         # create custom tf forcing file
-        f = netCDF4.Dataset(os.path.join(base_exp_dir, tf_fname), 'r')
-        f.set_auto_maskandscale(False)
-        f.set_auto_chartostring(False)
-        xtime = f.variables['xtime'][:]
-        xtimestr = netCDF4.chartostring(xtime)
-        for t in range(len(xtimestr)):
-            if xtimestr[t][0:4] == str(self.branch_year):
-                ind = t
-                break
-        outFile = netCDF4.Dataset(os.path.join(self.work_dir, 'steady_tf.nc'),
-                                  'w', format='NETCDF4')
-        outFile.createDimension('Time', 1)
-        outFile.createDimension('StrLen', 64)
-        outFile.createDimension('nCells', len(f.dimensions['nCells']))
-        outFile.createDimension('nISMIP6OceanLayers',
-                                len(f.dimensions['nISMIP6OceanLayers']))
-        outFile.createVariable('ismip6shelfMelt_zOcean', 'f8',
-                               ('nISMIP6OceanLayers',))
-        outFile.createVariable('ismip6shelfMelt_3dThermalForcing',
-                               'f8', ('Time', 'nCells', 'nISMIP6OceanLayers'))
-        outFile.variables['ismip6shelfMelt_zOcean'][:] = \
-            f.variables['ismip6shelfMelt_zOcean'][:]
-        outFile.variables['ismip6shelfMelt_3dThermalForcing'][0, :, :] = \
-            f.variables['ismip6shelfMelt_3dThermalForcing'][ind, :, :]
-        outFile.createVariable('xtime', 'c', ('Time', 'StrLen'))
-        outFile.variables['xtime'][0, :] = netCDF4.stringtoarr(xtimestr[ind],
-                                                               64)
-        outFile.close()
-        f.close()
+        resample_forcing(os.path.join(base_exp_dir, tf_fname),
+                         os.path.join(self.work_dir, 'resampled_tf.nc'),
+                         self.branch_year - 5,
+                         self.branch_year + 5,
+                         self.branch_year, 2301)
 
         # copy graph files
         for gfile in glob.glob(os.path.join(base_exp_dir, 'graph.info.*')):
