@@ -1,4 +1,3 @@
-import glob
 import os
 import shutil
 import sys
@@ -111,10 +110,6 @@ class climateBranch(Step):
                          refyear - 5,
                          refyear + 5,
                          self.branch_year, 2301)
-
-        # copy graph files
-        for gfile in glob.glob(os.path.join(base_exp_dir, 'graph.info.*')):
-            shutil.copy(gfile, self.work_dir)
 
         self.add_model_as_input()
 
