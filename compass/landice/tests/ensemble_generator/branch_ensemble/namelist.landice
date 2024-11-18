@@ -6,7 +6,8 @@
     config_thickness_advection = 'fo'
     config_tracer_advection = 'fo'
 
-    config_calving = 'von_Mises_stress'
+    config_calving = 'ismip6_retreat'
+    config_ismip6_retreat_k = -170.0
     config_grounded_von_Mises_threshold_stress = 1.0e9
     config_floating_von_Mises_threshold_stress = 250.0e3
     config_calving_speed_limit = 0.000952 ! 30 km/yr
@@ -26,8 +27,8 @@
     config_surface_air_temperature_source = 'file'
     config_basal_heat_flux_source = 'file'
 
-    config_basal_mass_bal_float = 'ismip6'
-    config_front_mass_bal_grounded = 'ismip6'
+    config_basal_mass_bal_float = 'none'
+    config_front_mass_bal_grounded = 'none'
     config_use_3d_thermal_forcing_for_face_melt = .true.
 
     config_ice_density = 910.0
@@ -37,13 +38,13 @@
     config_adaptive_timestep = .true.
     config_adaptive_timestep_calvingCFL_fraction = 0.8
     config_adaptive_timestep_include_calving = .true.
-    config_adaptive_timestep_CFL_fraction = 0.2
+    config_adaptive_timestep_CFL_fraction = 0.7
     config_adaptive_timestep_force_interval = '0001-00-00_00:00:00'
 
     config_do_restart = .false.
     config_restart_timestamp_name = 'restart_timestamp'
     config_start_time = '2000-01-01_00:00:00'
-    config_stop_time = '2200-01-01_00:00:00'
+    config_stop_time = '2100-01-01_00:00:00'
 
     config_pio_num_iotasks = 1
     config_pio_stride = 32

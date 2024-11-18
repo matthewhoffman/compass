@@ -17,14 +17,14 @@ from compass.landice.ais_observations import ais_basin_info
 # --------------
 # general settings
 # --------------
-target_year = 1.0  # model year from start at which to calculate statistics
+target_year = 20.0  # model year from start at which to calculate statistics
 label_runs = False
 filter_runs = False
 plot_time_series = True
 plot_single_param_sensitivies = True
 plot_pairwise_param_sensitivities = True
 plot_maps = False
-lw = 0.5  # linewidth for ensemble plots
+lw = 1  # linewidth for ensemble plots
 
 # physical constants
 rhoi = 910.0
@@ -99,14 +99,14 @@ for qoi in qoi_info:
     qoi_info[qoi]['values'] = np.zeros((nRuns,)) * np.nan
     qoi_info[qoi]['obs'] = None
 
-final_time = np.zeros((nRuns,)) * np.nan
+final_time = np.zeros((nRuns,))
 run_nums = np.ones((nRuns,), dtype=int) * -1
 
 # Get ensemble-wide information
 basin = None
 ens_cfg = configparser.ConfigParser()
 # Check for presence of two possible cfg file names
-ens_cfg_file1 = 'ensemble.cfg'
+ens_cfg_file1 = 'control_ensemble.cfg'
 ens_cfg_file2 = 'branch_ensemble.cfg'
 if os.path.isfile(ens_cfg_file1):
     ens_cfg_file = ens_cfg_file1
@@ -316,8 +316,11 @@ for idx, run in enumerate(runs):
         GLMigFlux = f.variables['groundingLineMigrationFlux'][:] \
             / 1.0e12  # Gt/yr
         w = 50
-        GLMigFlux2 = np.convolve(GLMigFlux, np.ones(w), 'same') / w
-        GLflux2 = groundingLineFlux + GLMigFlux2
+        try:
+            GLMigFlux2 = np.convolve(GLMigFlux, np.ones(w), 'same') / w
+            GLflux2 = groundingLineFlux + GLMigFlux2
+        except:
+            GLflux2 = groundingLineFlux
 
         # Only process qois for runs that have reached target year
         indices = np.nonzero(years >= target_year)[0]

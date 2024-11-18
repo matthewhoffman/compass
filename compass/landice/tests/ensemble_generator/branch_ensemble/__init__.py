@@ -82,7 +82,7 @@ class BranchEnsemble(TestCase):
             run_name = f'run{run_num:03}'
             if (filtered_runs[run_num] and
                 os.path.isfile(os.path.join(control_test_dir, run_name,
-                                            f'rst.{branch_year}-01-01.nc'))):
+                                            f'rst.{branch_year}-07-01.nc'))):
                 print(f"Adding {run_name}")
                 # use this run
                 self.add_step(BranchRun(test_case=self, run_num=run_num))

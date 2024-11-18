@@ -235,24 +235,26 @@ class EnsembleMember(Step):
 
         # adjust gamma0 and deltaT
         # (only need to check one of these params)
-        basal_melt_param_file_path = section.get('basal_melt_param_file_path')
-        basal_melt_param_file_name = basal_melt_param_file_path.split('/')[-1]
-        base_fname = basal_melt_param_file_name.split('.')[:-1][0]
-        new_fname = f'{base_fname}_MODIFIED.nc'
-        shutil.copy(basal_melt_param_file_path,
-                    os.path.join(self.work_dir, new_fname))
-        _adjust_basal_melt_params(os.path.join(self.work_dir, new_fname),
-                                  self.gamma0, self.deltaT)
-        stream_replacements['basal_melt_param_file_name'] = new_fname
-        if self.gamma0 is not None:
-            run_info_cfg.set('run_info', 'gamma0', f'{self.gamma0}')
-        if self.deltaT is not None:
-            run_info_cfg.set('run_info', 'meltflux', f'{self.meltflux}')
-            run_info_cfg.set('run_info', 'deltaT', f'{self.deltaT}')
+#        basal_melt_param_file_path = section.get('basal_melt_param_file_path')
+#        basal_melt_param_file_name = basal_melt_param_file_path.split('/')[-1]
+#        base_fname = basal_melt_param_file_name.split('.')[:-1][0]
+#        new_fname = f'{base_fname}_MODIFIED.nc'
+#        shutil.copy(basal_melt_param_file_path,
+#                    os.path.join(self.work_dir, new_fname))
+#        _adjust_basal_melt_params(os.path.join(self.work_dir, new_fname),
+#                                  self.gamma0, self.deltaT)
+#        stream_replacements['basal_melt_param_file_name'] = new_fname
+#        if self.gamma0 is not None:
+#            run_info_cfg.set('run_info', 'gamma0', f'{self.gamma0}')
+#        if self.deltaT is not None:
+#            run_info_cfg.set('run_info', 'meltflux', f'{self.meltflux}')
+#            run_info_cfg.set('run_info', 'deltaT', f'{self.deltaT}')
 
         # set up forcing files (unmodified)
-        TF_file_path = section.get('TF_file_path')
-        stream_replacements['TF_file_path'] = TF_file_path
+        #TF_file_path = section.get('TF_file_path')
+        #stream_replacements['TF_file_path'] = TF_file_path
+        TF_Q_file_path = section.get('TF_Q_file_path')
+        stream_replacements['TF_Q_file_path'] = TF_Q_file_path
         SMB_file_path = section.get('SMB_file_path')
         stream_replacements['SMB_file_path'] = SMB_file_path
 
@@ -318,7 +320,7 @@ def _adjust_friction_exponent(orig_fric_exp, new_fric_exp, filename,
     extrapolate_variable(filename, 'muFriction', 'min')
 
     with open(albany_input_yaml, 'r') as txt:
-        text=txt.readlines()
+        text = txt.readlines()
         for iLine in range(len(text)):
             if "Power Exponent" in text[iLine]:
                 line_new = text[iLine].split(':')[0] + f': {new_fric_exp}\n'

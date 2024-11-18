@@ -95,18 +95,18 @@ class BranchRun(Step):
 
         # copy over the following:
         # restart file - but change year
-        rst_file = os.path.join(ctrl_dir, f'rst.{branch_year:04}-01-01.nc')
+        rst_file = os.path.join(ctrl_dir, f'rst.{branch_year:04}-07-01.nc')
         shutil.copy(rst_file, os.path.join(self.work_dir,
-                                           'rst.2015-01-01.nc'))
+                                           'rst.2000-07-01.nc'))
         f = netCDF4.Dataset(os.path.join(self.work_dir,
-                                         'rst.2015-01-01.nc'), 'r+')
+                                         'rst.2000-07-01.nc'), 'r+')
         xtime = f.variables['xtime']
-        xtime[0, :] = list('2015-01-01_00:00:00'.ljust(64))
+        xtime[0, :] = list('2000-07-01_00:00:00'.ljust(64))
         f.close()
 
         # create restart_timestamp
         with open(os.path.join(self.work_dir, 'restart_timestamp'), 'w') as f:
-            f.write('2015-01-01_00:00:00')
+            f.write('2000-07-01_00:00:00')
 
         # yaml file
         shutil.copy(os.path.join(ctrl_dir, 'albany_input.yaml'),
@@ -115,7 +115,7 @@ class BranchRun(Step):
         # set up namelist
         options = {'config_do_restart': '.true.',
                    'config_start_time': "'file'",
-                   'config_stop_time': "'2300-01-01_00:00:00'"}
+                   'config_stop_time': "'2100-07-01_00:00:00'"}
         namelist = compass.namelist.ingest(os.path.join(ctrl_dir,
                                                         'namelist.landice'))
         namelist = compass.namelist.replace(namelist, options)
