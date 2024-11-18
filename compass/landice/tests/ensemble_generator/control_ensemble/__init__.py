@@ -75,7 +75,8 @@ class ControlEnsemble(TestCase):
 
         # Define parameters being sampled and their ranges
         param_list = ['fric_exp', 'mu_scale', 'stiff_scale',
-                      'von_mises_threshold', 'calv_limit', 'gamma0',
+                      'von_mises_threshold', 'ismip6_retreat_param',
+                      'calv_limit', 'gamma0',
                       'meltflux']
 
         # Determine how many and which parameters are being used
@@ -119,6 +120,11 @@ class ControlEnsemble(TestCase):
                 param_dict[param]['vec'] = np.full((max_samples,), None)
 
         # Deal with a few special cases
+
+        if (param_dict['von_mises_threshold']['active'] and
+                param_dict['ismip6_retreat_param']['active']):
+            sys.exit("ERROR: von_mises_threshold and ismip6_retreat_param "
+                     "cannot be used together")
 
         # change units on calving speed limit from m/yr to s/yr
         if param_dict['calv_limit']['active']:
@@ -179,6 +185,7 @@ class ControlEnsemble(TestCase):
                 mu_scale=param_dict['mu_scale']['vec'][run_num],
                 stiff_scale=param_dict['stiff_scale']['vec'][run_num],
                 von_mises_threshold=param_dict['von_mises_threshold']['vec'][run_num],  # noqa
+                ismip6_retreat_param=param_dict['ismip6_retreat_param']['vec'][run_num],  # noqa
                 calv_spd_lim=param_dict['calv_limit']['vec'][run_num],
                 gamma0=param_dict['gamma0']['vec'][run_num],
                 meltflux=param_dict['meltflux']['vec'][run_num],

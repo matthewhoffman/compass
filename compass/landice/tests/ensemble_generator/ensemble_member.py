@@ -58,6 +58,7 @@ class EnsembleMember(Step):
                  mu_scale=None,
                  stiff_scale=None,
                  von_mises_threshold=None,
+                 ismip6_retreat_param=None,
                  calv_spd_lim=None,
                  gamma0=None,
                  meltflux=None,
@@ -102,6 +103,7 @@ class EnsembleMember(Step):
         self.mu_scale = mu_scale
         self.stiff_scale = stiff_scale
         self.von_mises_threshold = von_mises_threshold
+        self.ismip6_retreat_param = ismip6_retreat_param
         self.calv_spd_lim = calv_spd_lim
         self.gamma0 = gamma0
         self.meltflux = meltflux
@@ -179,6 +181,13 @@ class EnsembleMember(Step):
                 f'{self.von_mises_threshold}'
             run_info_cfg.set('run_info', 'von_mises_threshold',
                              f'{self.von_mises_threshold}')
+
+        # ISMIP6 retreat parameter
+        if self.ismip6_retreat_param is not None:
+            options['config_ismip6_retreat_k'] = \
+                f'{self.ismip6_retreat_param}'
+            run_info_cfg.set('run_info', 'ismip6_retreat_param',
+                             f'{self.ismip6_retreat_param}')
 
         # calving speed limit
         if self.calv_spd_lim is not None:
