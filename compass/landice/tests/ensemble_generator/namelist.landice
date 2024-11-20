@@ -17,6 +17,7 @@
     config_remove_icebergs = .true.
     config_remove_small_islands = .true.
     config_distribute_unablatedVolumeDynCell = .true.
+    config_calving_error_threshold = 9.0e36
 
     config_thermal_solver = 'temperature'
     config_thermal_calculate_bmb = .true.
@@ -43,7 +44,7 @@
     config_do_restart = .false.
     config_restart_timestamp_name = 'restart_timestamp'
     config_start_time = '2007-07-01_00:00:00'
-    config_stop_time = '2200-07-01_00:00:00'
+    config_stop_time = '2100-07-01_00:00:00'
 
     config_pio_num_iotasks = 1
     config_pio_stride = 32

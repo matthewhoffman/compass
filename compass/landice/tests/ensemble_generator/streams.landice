@@ -23,7 +23,7 @@
 <stream name="smb"
         type="input"
         mode="forward;analysis"
-        input_interval="initial_only"
+        input_interval="0001-00-00_00:00:00"
         reference_time="2000-07-01_00:00:00"
         filename_template="{{ SMB_file_path }}"
         runtime_format="single_file">
@@ -33,7 +33,7 @@
 <stream name="ocean_thermal_forcing"
         type="input"
         mode="forward;analysis"
-        input_interval="initial_only"
+        input_interval="0001-00-00_00:00:00"
         reference_time="2000-07-01_00:00:00"
         filename_template="{{ TF_file_path }}"
         runtime_format="single_file">
@@ -57,7 +57,7 @@
 <stream name="runoff_forcing"
         type="input"
         mode="forward;analysis"
-        input_interval="initial_only"
+        input_interval="0001-00-00_00:00:00"
         reference_time="2000-07-01_00:00:00"
         filename_template="{{ runoff_file_path }}"
         runtime_format="single_file">

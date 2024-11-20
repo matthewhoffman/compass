@@ -312,8 +312,8 @@ def setup_case(path, test_case, config_file, machine, work_dir, baseline_dir,
         if machine is not None:
             cores = step.cpus_per_task * step.ntasks
             min_cores = step.min_cpus_per_task * step.min_tasks
-            write_job_script(config, machine, cores, min_cores,
-                             step.work_dir)
+            #write_job_script(config, machine, cores, min_cores,
+            #                 step.work_dir)
 
     # pickle the test case and step for use at runtime
     pickle_filename = os.path.join(test_case.work_dir, 'test_case.pickle')

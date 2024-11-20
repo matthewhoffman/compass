@@ -17,17 +17,18 @@ from compass.landice.ais_observations import ais_basin_info
 # --------------
 # general settings
 # --------------
-target_year = 50.0  # model year from start at which to calculate statistics
+target_year = 73.0  # model year from start at which to calculate statistics
 # model year from start defining start of time interval over which to
 # calculate rates of change
-start_year_rate = 0.0
+start_year_rate = 1.0
 label_runs = True
 filter_runs = False
 plot_time_series = True
 plot_single_param_sensitivies = False
 plot_pairwise_param_sensitivities = False
-plot_qoi_histograms = False
+plot_qoi_histograms = True
 plot_maps = False
+plot_durations = False
 lw = 0.5  # linewidth for ensemble plots
 
 # physical constants
@@ -51,6 +52,8 @@ param_info = {
                        'values': np.zeros((nRuns,)) * np.nan},
     'von_mises_threshold': {'units': 'Pa',
                             'values': np.zeros((nRuns,)) * np.nan},
+    'von_mises_threshold_grd': {'units': 'Pa',
+                                'values': np.zeros((nRuns,)) * np.nan},
     'calv_spd_limit': {'units': 'm/s',
                        'values': np.zeros((nRuns,)) * np.nan},
     'mu_scale': {'units': 'unitless',
@@ -62,52 +65,53 @@ param_info = {
     'meltflux': {'units': 'Gt/yr',
                  'values': np.zeros((nRuns,)) * np.nan},
     'deltaT': {'units': 'deg C',
-               'values': np.zeros((nRuns,)) * np.nan}}
+               'values': np.zeros((nRuns,)) * np.nan},
+    'facemelt_b': {'units': 'm day^{-1} deg. C^{-beta}',
+                   'values': np.zeros((nRuns,)) * np.nan}}
 
 # Set up nested dictionary for possible quantities of interest.
 # The values array is 1d array of values from each run
 qoi_info = {
     'VAF change': {
-        'title': f'VAF change at year {target_year}',
+        'title': f'VAF change\nat {target_year}',
         'units': 'Gt'},
     'VAF change rate': {
-        'title': f'VAF change rate between year {start_year_rate} and {target_year}',  # noqa
+        'title': f'VAF change rate between\n {start_year_rate} & {target_year}',  # noqa
         'units': 'Gt/yr'},
     'total area change': {
-        'title': f'Total area change at year {target_year}',
+        'title': f'Total area change\nat {target_year}',
         'units': 'km$^2$'},
     'total area change rate': {
-        'title': f'Total area change rate between year {start_year_rate} and {target_year}',  # noqa
+        'title': f'Total area change rate between\n {start_year_rate} & {target_year}',  # noqa
         'units': 'km$^2$/yr'},
     'grd area change': {
-        'title': f'Grounded area change at year {target_year}',
+        'title': f'Grounded area change\nat {target_year}',
         'units': 'km$^2$'},
     'grd area change rate': {
-        'title': f'Grounded area change rate between year {start_year_rate} and {target_year}',  # noqa
+        'title': f'Grounded area change rate\nbetween {start_year_rate} & {target_year}',  # noqa
         'units': 'km$^2$/yr'},
     'grd vol change': {
-        'title': f'Grounded vol change at year {target_year}',
+        'title': f'Grounded vol change\nat {target_year}',
         'units': 'Gt'},
     'grd vol change rate': {
-        'title': f'Grounded vol change rate between year {start_year_rate} and {target_year}',  # noqa
+        'title': f'Grounded vol change rate\nbetween {start_year_rate} & {target_year}',  # noqa
         'units': 'Gt/yr'},
     'GL flux': {
-        'title': f'Grounding line flux at year {target_year}',
+        'title': f'Grounding line flux\nat {target_year}',
         'units': 'Gt/yr'},
     'melt flux': {
-        'title': f'Ice-shelf basal melt flux at year {target_year}',
+        'title': f'Ice-shelf basal melt flux\nat {target_year}',
         'units': 'Gt/yr'},
     'speed error': {
-        'title': f'Speed error at '
-                 f'year {target_year}',
+        'title': f'Speed error\nat {target_year}',
         'units': 'std. devs.'},
     'flt speed error': {
         'title': f'Speed error over '
-                 f'floating ice at year {target_year}',
+                 f'floating ice\nat {target_year}',
         'units': 'std. devs.'},
     'grd speed error': {
         'title': f'Speed error over '
-                 f'grounded ice at year {target_year}',
+                 f'grounded ice\nat {target_year}',
         'units': 'std. devs.'}}
 n_qoi = len(qoi_info)
 
@@ -325,7 +329,7 @@ for idx, run in enumerate(runs):
         iceArea = f.variables['totalIceArea'][:] / 1000.0**2  # in km^2
         grdVol = f.variables['groundedIceVolume'][:] / (1.0e12 / rhoi)  # in Gt
         BMB = f.variables['totalFloatingBasalMassBal'][:] / -1.0e12  # in Gt/yr
-        grSMB = f.variables['totalGroundedSfcMassBal'][:] / -1.0e12  # in Gt/yr
+        grSMB = f.variables['totalGroundedSfcMassBal'][:] / 1.0e12  # in Gt/yr
         groundingLineFlux = f.variables['groundingLineFlux'][:] \
             / 1.0e12  # Gt/yr
         GLMigFlux = f.variables['groundingLineMigrationFlux'][:] \
@@ -336,7 +340,7 @@ for idx, run in enumerate(runs):
         # The convolution is a boxcar filter with width w.
         # (Note: if w is larger than the length of your time series, an error
         # will occur.)
-        w = 50
+        w = 5
         GLMigFlux2 = np.convolve(GLMigFlux, np.ones(w), 'same') / w
         # GLflux2 includes both the groundingLineFlux and the migration flux
         GLflux2 = groundingLineFlux + GLMigFlux2
@@ -354,18 +358,18 @@ for idx, run in enumerate(runs):
             # find index to start year of rate calculations
             rate_dt = years[ii] - years[jj]
 
-            qoi_info['VAF change']['values'][idx] = VAF[ii] - VAF[0]
+            qoi_info['VAF change']['values'][idx] = VAF[ii] - VAF[jj]
             qoi_info['VAF change rate']['values'][idx] = \
                 (VAF[ii] - VAF[jj]) / rate_dt
-            qoi_info['grd vol change']['values'][idx] = grdVol[ii] - grdVol[0]
+            qoi_info['grd vol change']['values'][idx] = grdVol[ii] - grdVol[jj]
             qoi_info['grd vol change rate']['values'][idx] = \
                 (grdVol[ii] - grdVol[jj]) / rate_dt
             qoi_info['grd area change']['values'][idx] = (grdArea[ii] -
-                                                          grdArea[0])
+                                                          grdArea[jj])
             qoi_info['grd area change rate']['values'][idx] = \
                 (grdArea[ii] - grdArea[jj]) / rate_dt
             qoi_info['total area change']['values'][idx] = (iceArea[ii] -
-                                                            iceArea[0])
+                                                            iceArea[jj])
             qoi_info['total area change rate']['values'][idx] = \
                 (iceArea[ii] - iceArea[jj]) / rate_dt
             qoi_info['GL flux']['values'][idx] = groundingLineFlux[ii]
@@ -561,31 +565,31 @@ if plot_time_series:
 # --------------
 # run duration plots
 # --------------
-
-fig_duration = plt.figure(99, figsize=(8, 8), facecolor='w')
-nrow = 3
-ncol = 1
-
-ax_yr_histo = fig_duration.add_subplot(nrow, ncol, 1)
-plt.hist(final_time, bins=np.arange(final_time.min(), final_time.max() + 1))
-plt.xlabel('final simulated year')
-plt.ylabel('count')
-plt.grid()
-
-ax_yr_histo_cum = fig_duration.add_subplot(nrow, ncol, 2)
-plt.hist(final_time, bins=np.arange(final_time.min(), final_time.max() + 1),
-         cumulative=True)
-plt.xlabel('final simulated year')
-plt.ylabel('cumulative count')
-plt.grid()
-
-ax_yr_by_run = fig_duration.add_subplot(nrow, ncol, 3)
-plt.bar(run_nums, final_time, width=0.9)
-plt.xlabel('run number')
-plt.ylabel('final simulated year')
-plt.grid(axis='y')
-
-fig_duration.tight_layout()
+if plot_durations:
+   fig_duration = plt.figure(99, figsize=(8, 8), facecolor='w')
+   nrow = 3
+   ncol = 1
+   
+   ax_yr_histo = fig_duration.add_subplot(nrow, ncol, 1)
+   plt.hist(final_time, bins=np.arange(final_time.min(), final_time.max() + 1))
+   plt.xlabel('final simulated year')
+   plt.ylabel('count')
+   plt.grid()
+   
+   ax_yr_histo_cum = fig_duration.add_subplot(nrow, ncol, 2)
+   plt.hist(final_time, bins=np.arange(final_time.min(), final_time.max() + 1),
+            cumulative=True)
+   plt.xlabel('final simulated year')
+   plt.ylabel('cumulative count')
+   plt.grid()
+   
+   ax_yr_by_run = fig_duration.add_subplot(nrow, ncol, 3)
+   plt.bar(run_nums, final_time, width=0.9)
+   plt.xlabel('run number')
+   plt.ylabel('final simulated year')
+   plt.grid(axis='y')
+   
+   fig_duration.tight_layout()
 
 # --------------
 # single parameter plots
