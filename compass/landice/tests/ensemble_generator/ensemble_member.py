@@ -4,6 +4,7 @@ import shutil
 from importlib import resources
 
 import netCDF4
+import numpy as np
 
 from compass.io import symlink
 from compass.job import write_job_script
@@ -202,7 +203,6 @@ class EnsembleMember(Step):
             run_info_cfg.set('run_info', 'calv_spd_limit',
                              f'{self.calv_spd_lim}')
 
-        # adjust basal friction exponent
         # rename and copy base file
         input_file_path = section.get('input_file_path')
         input_file_name = input_file_path.split('/')[-1]
@@ -213,6 +213,19 @@ class EnsembleMember(Step):
                                                   new_input_fname))
         # set input filename in streams and create streams file
         stream_replacements = {'input_file_init_cond': new_input_fname}
+
+        # ingest basal friction sample if needed
+        use_fric_samples = section.getboolean('use_fric_samples')
+        if use_fric_samples is True:
+            fric_samples_file = section.get('fric_samples_file')
+            fric_map_file = section.get('fric_map_file')
+            mpas_cellid_file = section.get('mpas_cellid_file')
+            _apply_fric_sample(self.run_num, fric_samples_file,
+                               fric_map_file, mpas_cellid_file,
+                               os.path.join(self.work_dir,
+                                            new_input_fname))
+
+        # adjust basal friction exponent
         if self.basal_fric_exp is not None:
             # adjust mu and exponent
             orig_fric_exp = section.getfloat('orig_fric_exp')
@@ -351,4 +364,31 @@ def _adjust_basal_melt_params(filename, gamma0=None, deltaT=None):
         f.variables['ismip6shelfMelt_gamma0'][:] = gamma0
     if deltaT is not None:
         f.variables['ismip6shelfMelt_deltaT'][:] = deltaT
+    f.close()
+
+
+def _apply_fric_sample(sample_num, sample_file,
+                       mu_opt_file, mpas_cellid_file,
+                       ic_file):
+
+    samples = np.load(sample_file)
+    sample = samples[sample_num, :]
+
+    logMuOpt = np.loadtxt(mu_opt_file)
+    logMuOpt = logMuOpt[1:]  # skip first row containing array size
+
+    mpasMap = np.loadtxt(mpas_cellid_file, dtype='int')
+    mpasMap = mpasMap[1:]  # skip first row containing array size
+
+    f = netCDF4.Dataset(ic_file, 'r+')
+    f.set_auto_mask(False)
+    nCells = len(f.dimensions['nCells'])
+
+    # Assign quantity (outside of Albany ice region)
+    mu = 0.2 * np.ones(nCells)
+
+    scaling = 0.25  # scales the perturbation
+    mu[mpasMap[:] - 1] = np.exp(scaling * sample + logMuOpt)
+
+    f.variables['muFriction'][0, :] = mu[:]
     f.close()
