@@ -23,7 +23,7 @@
 <stream name="smb"
         type="input"
         mode="forward;analysis"
-        input_interval="0001-00-00_00:00:00"
+        input_interval="initial_only"
         reference_time="2000-07-01_00:00:00"
         filename_template="{{ SMB_file_path }}"
         runtime_format="single_file">
@@ -33,31 +33,17 @@
 <stream name="ocean_thermal_forcing"
         type="input"
         mode="forward;analysis"
-        input_interval="0001-00-00_00:00:00"
+        input_interval="initial_only"
         reference_time="2000-07-01_00:00:00"
         filename_template="{{ TF_file_path }}"
         runtime_format="single_file">
-        <var name="ismip6shelfMelt_3dThermalForcing"/>
         <var name="ismip6_2dThermalForcing"/>
-        <var name="ismip6shelfMelt_zOcean"/>
-</stream>
-
-<stream name="basal_melt"
-        type="input"
-        mode="forward;analysis"
-        input_interval="initial_only"
-        reference_time="2000-07-01_00:00:00"
-        filename_template="{{ basal_melt_param_file_name }}"
-        runtime_format="single_file">
-        <var name="ismip6shelfMelt_basin"/>
-        <var name="ismip6shelfMelt_gamma0"/>
-        <var name="ismip6shelfMelt_deltaT"/>
 </stream>
 
 <stream name="runoff_forcing"
         type="input"
         mode="forward;analysis"
-        input_interval="0001-00-00_00:00:00"
+        input_interval="initial_only"
         reference_time="2000-07-01_00:00:00"
         filename_template="{{ runoff_file_path }}"
         runtime_format="single_file">
@@ -67,8 +53,8 @@
 <stream name="output"
         type="output"
         reference_time="2000-07-01_00:00:00"
-        filename_template="output/output_$Y.nc"
-        filename_interval="0020-00-00_00:00:00"
+        filename_template="output/output.nc"
+        filename_interval="none"
         clobber_mode="overwrite"
         precision="double"
         output_interval="0001-00-00_00:00:00">
