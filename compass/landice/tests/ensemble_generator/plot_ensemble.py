@@ -17,7 +17,7 @@ from compass.landice.ais_observations import ais_basin_info
 # --------------
 # general settings
 # --------------
-target_year = 73.0  # model year from start at which to calculate statistics
+target_year = 1.0  # model year from start at which to calculate statistics
 # model year from start defining start of time interval over which to
 # calculate rates of change
 start_year_rate = 1.0
@@ -26,7 +26,7 @@ filter_runs = False
 plot_time_series = True
 plot_single_param_sensitivies = False
 plot_pairwise_param_sensitivities = False
-plot_qoi_histograms = True
+plot_qoi_histograms = False
 plot_maps = False
 plot_durations = False
 lw = 0.5  # linewidth for ensemble plots
@@ -383,7 +383,7 @@ for idx, run in enumerate(runs):
             valid_run = False
 
         # calculate qoi's requiring spatial output
-        DS = xr.open_mfdataset(run + '/output/' + 'output_*.nc',
+        DS = xr.open_mfdataset(run + '/output/' + 'output*.nc',
                                combine='nested', concat_dim='Time',
                                decode_timedelta=False,
                                chunks={"Time": 10})
@@ -566,30 +566,32 @@ if plot_time_series:
 # run duration plots
 # --------------
 if plot_durations:
-   fig_duration = plt.figure(99, figsize=(8, 8), facecolor='w')
-   nrow = 3
-   ncol = 1
-   
-   ax_yr_histo = fig_duration.add_subplot(nrow, ncol, 1)
-   plt.hist(final_time, bins=np.arange(final_time.min(), final_time.max() + 1))
-   plt.xlabel('final simulated year')
-   plt.ylabel('count')
-   plt.grid()
-   
-   ax_yr_histo_cum = fig_duration.add_subplot(nrow, ncol, 2)
-   plt.hist(final_time, bins=np.arange(final_time.min(), final_time.max() + 1),
-            cumulative=True)
-   plt.xlabel('final simulated year')
-   plt.ylabel('cumulative count')
-   plt.grid()
-   
-   ax_yr_by_run = fig_duration.add_subplot(nrow, ncol, 3)
-   plt.bar(run_nums, final_time, width=0.9)
-   plt.xlabel('run number')
-   plt.ylabel('final simulated year')
-   plt.grid(axis='y')
-   
-   fig_duration.tight_layout()
+    fig_duration = plt.figure(99, figsize=(8, 8), facecolor='w')
+    nrow = 3
+    ncol = 1
+
+    ax_yr_histo = fig_duration.add_subplot(nrow, ncol, 1)
+    plt.hist(final_time,
+             bins=np.arange(final_time.min(), final_time.max() + 1))
+    plt.xlabel('final simulated year')
+    plt.ylabel('count')
+    plt.grid()
+
+    ax_yr_histo_cum = fig_duration.add_subplot(nrow, ncol, 2)
+    plt.hist(final_time,
+             bins=np.arange(final_time.min(), final_time.max() + 1),
+             cumulative=True)
+    plt.xlabel('final simulated year')
+    plt.ylabel('cumulative count')
+    plt.grid()
+
+    ax_yr_by_run = fig_duration.add_subplot(nrow, ncol, 3)
+    plt.bar(run_nums, final_time, width=0.9)
+    plt.xlabel('run number')
+    plt.ylabel('final simulated year')
+    plt.grid(axis='y')
+
+    fig_duration.tight_layout()
 
 # --------------
 # single parameter plots
