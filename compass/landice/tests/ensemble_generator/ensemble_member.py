@@ -385,10 +385,12 @@ def _apply_fric_sample(sample_num, sample_file,
     nCells = len(f.dimensions['nCells'])
 
     # Assign quantity (outside of Albany ice region)
-    mu = 0.2 * np.ones(nCells)
+    mu = -1.0 * np.ones(nCells)
 
-    scaling = 0.25  # scales the perturbation
+    scaling = 1.0  # scales the perturbation
     mu[mpasMap[:] - 1] = np.exp(scaling * sample + logMuOpt)
 
     f.variables['muFriction'][0, :] = mu[:]
     f.close()
+
+    extrapolate_variable(ic_file, 'muFriction', 'min')
