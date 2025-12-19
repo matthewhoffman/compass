@@ -43,7 +43,7 @@ class Ismip6AisProj2300TpBranches(TestCase):
 
         branch_interval = section.getint('branch_interval')
 
-        branch_points = np.arange(2000 + branch_interval, 2260,
+        branch_points = np.arange(2000 + branch_interval, 2299,
                                   branch_interval)
         print("Setting up branch points at:", branch_points)
 
