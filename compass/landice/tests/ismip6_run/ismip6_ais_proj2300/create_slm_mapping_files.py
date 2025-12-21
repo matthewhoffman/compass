@@ -101,7 +101,7 @@ class CreateSlmMappingFiles(Step):
                      '-d', slm_scripfile,
                      '-w', 'mapfile_mali_to_slm.nc',
                      '-m', 'conserve',
-                     '-i', '-64bit_offset', '--netcdf4',
+                     '-i', '--netcdf4',
                      '--src_regional'])
 
         check_call(args, logger)
@@ -115,7 +115,7 @@ class CreateSlmMappingFiles(Step):
                      '-d', mali_scripfile,
                      '-w', 'mapfile_slm_to_mali.nc',
                      '-m', 'bilinear',
-                     '-i', '-64bit_offset', '--netcdf4',
+                     '-i', '--netcdf4',
                      '--dst_regional'])
 
         check_call(args, logger)
