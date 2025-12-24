@@ -97,6 +97,21 @@ class climateBranch(Step):
         else:
             sys.exit(f'"branch_type" unknown: {self.branch_type}')
 
+        # copy SLM inputs if they exist
+        slm_nl = os.path.join(base_exp_dir, 'namelist.sealevel')
+        if os.path.exists(slm_nl):
+            shutil.copy(slm_nl, self.work_dir)
+        slm_map1 = os.path.join(base_exp_dir, 'mapfile_mali_to_slm.nc')
+        if os.path.exists(slm_map1):
+            shutil.copy(slm_map1, self.work_dir)
+        slm_map2 = os.path.join(base_exp_dir, 'mapfile_slm_to_mali.nc')
+        if os.path.exists(slm_map2):
+            shutil.copy(slm_map2, self.work_dir)
+        slm_output = os.path.join(base_exp_dir, 'OUTPUT_SLM')
+        if os.path.exists(slm_output):
+            shutil.copytree(slm_output,
+                            os.path.join(self.work_dir, 'OUTPUT_SLM'))
+
         # create custom smb forcing file
         resample_forcing(os.path.join(base_exp_dir, smb_fname),
                          os.path.join(self.work_dir, 'resampled_smb.nc'),
