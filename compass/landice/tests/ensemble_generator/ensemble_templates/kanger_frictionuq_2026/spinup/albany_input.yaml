@@ -2,6 +2,7 @@
 ---
 ANONYMOUS:
   Problem:
+    Depth Integrated Model: true
     LandIce Field Norm:
       sliding_velocity_basalside:
         Regularization Type: Given Value
@@ -42,7 +43,7 @@ ANONYMOUS:
           Tolerance: 1.0e-05
         Test 1:
           Test Type: MaxIters
-          Maximum Iterations: 50
+          Maximum Iterations: 70
       Printing:
         Output Precision: 3
         Output Processor: 0
